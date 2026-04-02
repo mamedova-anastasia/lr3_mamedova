@@ -342,7 +342,7 @@ ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True,
         explode=explode, wedgeprops={'lw':1, 'ls':'--', 'edgecolor': "k"},
         rotatelabels=True) # что это означает? это настройки для отображения диаграммы, которые включают параметры, такие как ширина линии (lw), стиль линии (ls) и цвет линии (edgecolor) а также поворот меток (rotatelabels) и равные оси (ax.axis("equal"))
 ax.axis("equal")
-plt.savefig ('chart22.png')
+plt.savefig ('chart33.png')
 plt.figure()
 table1 = list(zip(Y, Am_lst))
 table2 = list(zip(Y, Am_lst_2))

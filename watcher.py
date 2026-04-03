@@ -14,7 +14,7 @@ printer_ips = ['192.168.1.100', '192.168.1.101', '192.168.1.102']
 def send_to_engine(packet_data):
   try:
      response = requests.post(decision_engine_url, json=packet_data, timeout=1)
-     print(f'Sent to engine, status: {response.status_code}')
+     print(f'Send to engine, status: {response.status_code}')
   except  Exception as e: 
      print(f'Fail to send: {e}')
 

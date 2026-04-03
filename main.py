@@ -261,133 +261,133 @@
 # plt.bar(tfame['Y'], tfame2['Am_lst_2'])
 # plt.savefig('chart18.png')
 
-# from sympy import *
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
+from sympy import *
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-# # Символьные переменные
-# P_i, w_i, m_i = symbols("P_i w_i m_i")
+# Символьные переменные
+P_i, w_i, m_i = symbols("P_i w_i m_i")
 
-# print("Расчет вероятности обнаружения атаки деавторизации")
-# # Исходные данные: правила обнаружения
-# # Правило 1: Подмена MAC-адреса
-# # Правило 2: Аномальная частота deauth-кадров
-# # Правило 3: Отсутствие предыдущей аутентификации
-# # Правило 4: Несоответствие sequence number
+print("Расчет вероятности обнаружения атаки деавторизации")
+# Исходные данные: правила обнаружения
+# Правило 1: Подмена MAC-адреса
+# Правило 2: Аномальная частота deauth-кадров
+# Правило 3: Отсутствие предыдущей аутентификации
+# Правило 4: Несоответствие sequence number
 
-# P_base = [0.85, 0.90, 0.75, 0.70]  # базовая вероятность каждого правила
-# weights = [0.35, 0.30, 0.20, 0.15]  # веса правил
-# checks = [3, 5, 2, 4]  # количество проверок за временное окно
+P_base = [0.85, 0.90, 0.75, 0.70]  # базовая вероятность каждого правила
+weights = [0.35, 0.30, 0.20, 0.15]  # веса правил
+checks = [3, 5, 2, 4]  # количество проверок за временное окно
 
-# n_rules = len(P_base)
+n_rules = len(P_base)
 
-# # 1 способ: Базовая формула P = 1 - ∏(1 - P_i)
+# 1 способ: Базовая формула P = 1 - ∏(1 - P_i)
 
-# print("1 способ: Базовая формула (без весов)")
+print("1 способ: Базовая формула (без весов)")
 
-# P_detect_1 = 1
-# for p in P_base:
-#     P_detect_1 *= 1 - p
-# P_detect_1 = 1 - P_detect_1
+P_detect_1 = 1
+for p in P_base:
+    P_detect_1 *= 1 - p
+P_detect_1 = 1 - P_detect_1
 
-# print(f"P_i: {P_base}")
-# print(f"Вероятность обнаружения (базовая): {P_detect_1:.4f} ({P_detect_1 * 100:.2f}%)")
+print(f"P_i: {P_base}")
+print(f"Вероятность обнаружения (базовая): {P_detect_1:.4f} ({P_detect_1 * 100:.2f}%)")
 
-# # 2 способ: Расширенная формула P = 1 - ∏(1 - w_i * P_i)^m_i
-# print("2 способ: Расширенная формула (веса + многократные проверки)")
+# 2 способ: Расширенная формула P = 1 - ∏(1 - w_i * P_i)^m_i
+print("2 способ: Расширенная формула (веса + многократные проверки)")
 
-# prod_term = 1
-# for i in range(n_rules):
-#     term = (1 - weights[i] * P_base[i]) ** checks[i]
-#     prod_term *= term
+prod_term = 1
+for i in range(n_rules):
+    term = (1 - weights[i] * P_base[i]) ** checks[i]
+    prod_term *= term
 
-# P_detect_2 = 1 - prod_term
+P_detect_2 = 1 - prod_term
 
-# print(f"w_i: {weights}")
-# print(f"m_i: {checks}")
-# print(
-#     f"Вероятность обнаружения (расширенная): {P_detect_2:.6f} ({P_detect_2 * 100:.4f}%)"
-# )
+print(f"w_i: {weights}")
+print(f"m_i: {checks}")
+print(
+    f"Вероятность обнаружения (расширенная): {P_detect_2:.6f} ({P_detect_2 * 100:.4f}%)"
+)
 
-# # Табличный вывод (pandas)
-# Y = range(1, n_rules + 1)
+# Табличный вывод (pandas)
+Y = range(1, n_rules + 1)
 
-# # Таблица 1: характеристики правил
-# table1 = list(zip(Y, P_base, weights, checks))
-# df1 = pd.DataFrame(table1, columns=["Правило", "P_i", "w_i", "m_i"])
-# print("Таблица 1: Характеристики правил обнаружения")
-# print(df1)
+# Таблица 1: характеристики правил
+table1 = list(zip(Y, P_base, weights, checks))
+df1 = pd.DataFrame(table1, columns=["Правило", "P_i", "w_i", "m_i"])
+print("Таблица 1: Характеристики правил обнаружения")
+print(df1)
 
-# # Таблица 2: пошаговый расчет расширенной формулы
-# wP = [round(weights[i] * P_base[i], 4) for i in range(n_rules)]
-# term_values = [
-#     round((1 - weights[i] * P_base[i]) ** checks[i], 6) for i in range(n_rules)
-# ]
-# table2 = list(zip(Y, wP, checks, term_values))
-# df2 = pd.DataFrame(table2, columns=["Правило", "w_i*P_i", "m_i", "(1-w_i*P_i)^m_i"])
-# print("Таблица 2: Пошаговый расчет расширенной формулы")
-# print(df2)
+# Таблица 2: пошаговый расчет расширенной формулы
+wP = [round(weights[i] * P_base[i], 4) for i in range(n_rules)]
+term_values = [
+    round((1 - weights[i] * P_base[i]) ** checks[i], 6) for i in range(n_rules)
+]
+table2 = list(zip(Y, wP, checks, term_values))
+df2 = pd.DataFrame(table2, columns=["Правило", "w_i*P_i", "m_i", "(1-w_i*P_i)^m_i"])
+print("Таблица 2: Пошаговый расчет расширенной формулы")
+print(df2)
 
-# # Визуализация
+# Визуализация
 
-# # 1. Линейный график: сравнение вероятностей
-# plt.figure()
-# plt.plot(Y, [P_detect_1] * n_rules, "b-o", label="Базовая формула", linewidth=2)
-# plt.plot(Y, [P_detect_2] * n_rules, "r-s", label="Расширенная формула", linewidth=2)
-# plt.xlabel("Номер правила")
-# plt.ylabel("Вероятность обнаружения")
-# plt.title("Сравнение базовой и расширенной вероятности обнаружения")
-# plt.legend()
-# plt.grid(True, alpha=0.3)
-# plt.savefig("chart_detect_comparison.png")
+# 1. Линейный график: сравнение вероятностей
+plt.figure()
+plt.plot(Y, [P_detect_1] * n_rules, "b-o", label="Базовая формула", linewidth=2)
+plt.plot(Y, [P_detect_2] * n_rules, "r-s", label="Расширенная формула", linewidth=2)
+plt.xlabel("Номер правила")
+plt.ylabel("Вероятность обнаружения")
+plt.title("Сравнение базовой и расширенной вероятности обнаружения")
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.savefig("chart_detect_comparison.png")
 
-# # 2. Столбчатая диаграмма: веса правил
-# plt.figure()
-# plt.bar(Y, weights, color="steelblue", edgecolor="black")
-# plt.xlabel("Номер правила")
-# plt.ylabel("Вес правила w_i")
-# plt.title("Распределение весов правил обнаружения")
-# plt.savefig("chart_weights.png")
+# 2. Столбчатая диаграмма: веса правил
+plt.figure()
+plt.bar(Y, weights, color="steelblue", edgecolor="black")
+plt.xlabel("Номер правила")
+plt.ylabel("Вес правила w_i")
+plt.title("Распределение весов правил обнаружения")
+plt.savefig("chart_weights.png")
 
-# # 3. Круговая диаграмма: распределение весов (как в образце)
-# vals = weights
-# labels = [str(x) for x in Y]
-# explode = (0.05, 0.05, 0.05, 0.05)
-# plt.figure()
-# plt.pie(
-#     vals,
-#     labels=labels,
-#     autopct="%1.1f%%",
-#     shadow=True,
-#     explode=explode,
-#     wedgeprops={"lw": 1, "ls": "--", "edgecolor": "k"},
-#     rotatelabels=True,
-# )
-# plt.title("Распределение весов правил обнаружения")
-# plt.axis("equal")
-# plt.savefig("chart_pie_weights.png")
+# 3. Круговая диаграмма: распределение весов (как в образце)
+vals = weights
+labels = [str(x) for x in Y]
+explode = (0.05, 0.05, 0.05, 0.05)
+plt.figure()
+plt.pie(
+    vals,
+    labels=labels,
+    autopct="%1.1f%%",
+    shadow=True,
+    explode=explode,
+    wedgeprops={"lw": 1, "ls": "--", "edgecolor": "k"},
+    rotatelabels=True,
+)
+plt.title("Распределение весов правил обнаружения")
+plt.axis("equal")
+plt.savefig("chart_pie_weights.png")
 
-# # 4. Круговая диаграмма: вклад правил в w_i*P_i
-# vals2 = wP
-# plt.figure()
-# plt.pie(
-#     vals2,
-#     labels=labels,
-#     autopct="%1.1f%%",
-#     shadow=True,
-#     explode=explode,
-#     wedgeprops={"lw": 1, "ls": "--", "edgecolor": "k"},
-#     rotatelabels=True,
-# )
-# plt.title("Вклад правил в обнаружение (w_i * P_i)")
-# plt.axis("equal")
-# plt.savefig("chart_pie_contribution.png")
+# 4. Круговая диаграмма: вклад правил в w_i*P_i
+vals2 = wP
+plt.figure()
+plt.pie(
+    vals2,
+    labels=labels,
+    autopct="%1.1f%%",
+    shadow=True,
+    explode=explode,
+    wedgeprops={"lw": 1, "ls": "--", "edgecolor": "k"},
+    rotatelabels=True,
+)
+plt.title("Вклад правил в обнаружение (w_i * P_i)")
+plt.axis("equal")
+plt.savefig("chart_pie_contribution.png")
 
-# # 5. Столбчатая диаграмма: значения (1-w_i*P_i)^m_i
-# plt.figure()
-# plt.bar(Y, term_values, color="darkgreen", edgecolor="black")
-# plt.xlabel("Номер правила")
-# plt.ylabel("(1-w_i*P_i)^m_i")
-# plt.title("Значения слагаемых в произведении")
-# plt.savefig("chart_terms.png")
+# 5. Столбчатая диаграмма: значения (1-w_i*P_i)^m_i
+plt.figure()
+plt.bar(Y, term_values, color="darkgreen", edgecolor="black")
+plt.xlabel("Номер правила")
+plt.ylabel("(1-w_i*P_i)^m_i")
+plt.title("Значения слагаемых в произведении")
+plt.savefig("chart_terms.png")

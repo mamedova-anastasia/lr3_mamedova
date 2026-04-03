@@ -40,7 +40,7 @@ for i in range(7):
    C_ost -= Am.subs({C: 30000, T:7, k:2})
    Am_lst_2.append (round (Am.subs({C: 30000, T:7, k:2}), 2))
    Aj += Am
-   C_ost_lst_2.append(round(C_ost, 2))
+   C_ost_lst_2.append(round(C_ost, 2)) #что это обозначает? это остаток, который остается после вычета суммы амортизации, тоесть остаток от стоимости нового оборудования 
 print ('Am_lst_2:', Am_lst_2)
 print ('C_ost_lst_2:', C_ost_lst_2)
 
@@ -76,9 +76,9 @@ explode = (0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
 fig, ax = plt.subplots()
 ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True,
         explode=explode, wedgeprops={'lw':1, 'ls':'--', 'edgecolor': "k"},
-        rotatelabels=True) # что это означает? это настройки для отображения диаграммы, которые включают параметры, такие как ширина линии (lw), стиль линии (ls) и цвет линии (edgecolor) а также поворот меток (rotatelabels) и равные оси (ax.axis("equal"))
+        rotatelabels=True) 
 ax.axis("equal")
-plt.savefig ('chart33.png')
+plt.savefig ('chart22.png')
 plt.figure()
 table1 = list(zip(Y, Am_lst))
 table2 = list(zip(Y, Am_lst_2))
@@ -88,7 +88,12 @@ plt.bar(tfame['Y'], tfame['Am_lst'])
 plt.savefig ('chart23.jpeg')
 plt.figure()
 plt.bar(tfame['Y'], tfame2['Am_lst_2'])
-plt.savefig ('chart24.png')
+plt.savefig ('chart30.png')
+# все отлично работает, ставлю 5/5
 
+# Задание 3
+# Удален и затем восстановлен контейнер визуализации расчетов
 
-# # Задание 3
+# Задание 4 
+# Выполняла с Лихонос
+# строка 43

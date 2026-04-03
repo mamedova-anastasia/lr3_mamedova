@@ -33,7 +33,7 @@ def handle_arp(packet):
          'operation': 'is-at' if arp.op == 2 else 'who-has'
        }
        print(f'Detected ARP packet: {data}')
-       sent_to_engine(data)
+       send_to_engine(data)
 
 # Запуск сниффера
 print('ARP watcher started. Monitoring printers...')

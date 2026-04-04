@@ -122,3 +122,13 @@ def show_tables_and_charts():
 
 
 
+print('='*60)
+print('КОНТЕЙНЕР МОНИТОРИНГА ARP-ТРАФИКА (ЭМУЛЯЦИЯ)')
+print('Для лабораторной работы по УЖЦИС')
+print('='*60)
+print('\nЭмулируем получение ARP-пакетов от принтеров...\n')
+
+emulate_arp_packets(num_packets=50)
+
+show_tables_and_charts()
+

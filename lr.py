@@ -95,7 +95,6 @@ def show_tables_and_charts():
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig('printer_stats.png')
-    print("\nГрафик 1 сохранён: printer_stats.png")
 
     # ГРАФИК 2: Атаки vs легитимные пакеты
     plt.figure(figsize=(8, 6))
@@ -108,7 +107,6 @@ def show_tables_and_charts():
             explode=(0, 0.1))
     plt.title('Соотношение легитимных пакетов и атак')
     plt.savefig('attacks_pie.png')
-    print("График 2 сохранён: attacks_pie.png")
 
     # ГРАФИК 3: Количество атак по принтерам
     plt.figure(figsize=(10, 6))
@@ -121,26 +119,6 @@ def show_tables_and_charts():
         plt.xticks(rotation=45)
         plt.tight_layout()
         plt.savefig('attacks_by_printer.png')
-        print("График 3 сохранён: attacks_by_printer.png")
 
-    print("\nВсе графики сохранены в текущую директорию")
 
-# ========== ЗАПУСК ЭМУЛЯЦИИ ==========
-print('='*60)
-print('КОНТЕЙНЕР МОНИТОРИНГА ARP-ТРАФИКА (ЭМУЛЯЦИЯ)')
-print('Для лабораторной работы по УЖЦИС')
-print('='*60)
-print('\nЭмулируем получение ARP-пакетов от принтеров...\n')
 
-emulate_arp_packets(num_packets=50)
-
-print('\n' + '='*60)
-print('ФОРМИРОВАНИЕ ТАБЛИЦ И ГРАФИКОВ')
-print('='*60)
-
-show_tables_and_charts()
-
-print('\n' + '='*60)
-print('РАБОТА ЗАВЕРШЕНА')
-print('Полученные данные можно использовать в отчёте по лабораторной работе')
-print('='*60)

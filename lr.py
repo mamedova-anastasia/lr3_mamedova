@@ -1,134 +1,109 @@
-# Контейнер мониторинга ARP-трафика 
-
-from datetime import datetime
+# Контейнер обнаружения и защиты от деаутентификации (802.11)
+import random
 import pandas as pd
 import matplotlib.pyplot as plt
-from collections import Counter
-import random
 
-# НАСТРОЙКИ
-printer_ips = ['192.168.1.100', '192.168.1.101', '192.168.1.102']
+# Настройки сети
+AP_MAC = 'AA:BB:CC:DD:EE:FF'
+SSID   = 'OfficeNet_5G'
+DEAUTH_THRESHOLD = 2    # сколько deauth подряд считается атакой
 
-# Ожидаемые MAC для принтеров (эталон)
-expected_macs = {
-    '192.168.1.100': '00:11:22:33:44:55',
-    '192.168.1.101': '66:77:88:99:AA:BB',
-    '192.168.1.102': 'CC:DD:EE:FF:00:11'
+# Три принтера
+PRINTERS = {
+    'Printer-1': '11:22:33:44:55:66',
+    'Printer-2': '22:33:44:55:66:77',
+    'Printer-3': '33:44:55:66:77:88',
 }
 
-# Хранилище данных
-detected_packets = []
-attack_log = []
+random.seed(42)
 
-# ========== ФУНКЦИЯ ЭМУЛЯЦИИ ПАКЕТОВ ==========
-def emulate_arp_packets(num_packets=50):
-    """
-    Эмулирует получение ARP-пакетов от принтеров.
-    Часть пакетов — легитимные, часть — атаки (подмена MAC).
-    """
-    for i in range(num_packets):
-        # Выбираем случайный принтер
-        printer_ip = random.choice(printer_ips)
+NORMAL_TYPES = ['BEACON', 'DATA', 'DATA', 'ASSOC_REQ', 'PROBE_REQ']
 
-        # С вероятностью 30% генерируем атаку (подменённый MAC)
-        is_attack = random.random() < 0.3
+frames  = []
 
-        if is_attack:
-            # Генерируем случайный поддельный MAC
-            fake_mac = ':'.join(f'{random.randint(0,255):02X}' for _ in range(6))
-            src_mac = fake_mac
-        else:
-            # Берём правильный MAC
-            src_mac = expected_macs[printer_ip]
+# у каждого принтера свой burst-счётчик
+burst   = {'Printer-1': 0, 'Printer-2': 0, 'Printer-3': 0}
 
-        data = {
-            'timestamp': datetime.now().isoformat(),
-            'src_ip': printer_ip,
-            'src_mac': src_mac,
-            'target_ip': '192.168.1.1',  # шлюз
-            'operation': random.choice(['is-at', 'who-has']),
-            'is_attack': is_attack
-        }
+for i in range(15):
+    # Каждый кадр — выбираем случайный принтер как цель
+    printer_name = random.choice(list(PRINTERS.keys()))
+    printer_mac  = PRINTERS[printer_name]
 
-        detected_packets.append(data)
+    # Зона атаки — кадры 6–12, вероятность 70%
+    is_attack = 6 <= i < 13 and random.random() < 0.7
 
-        if is_attack:
-            attack_log.append(data)
-            print(f'[ATTACK] {printer_ip} объявил MAC {src_mac} (ожидался {expected_macs[printer_ip]})')
-        else:
-            print(f'[OK] {printer_ip} -> MAC {src_mac}')
+    if is_attack:
+        ftype = 'DEAUTH'
+        src   = AP_MAC       # подменённый MAC точки доступа
+        burst[printer_name] += 1
+    else:
+        ftype = random.choice(NORMAL_TYPES)
+        src   = AP_MAC if ftype in ('BEACON', 'ASSOC_REQ') else printer_mac
+        burst[printer_name] = 0   # сброс при нормальном кадре
 
-# ========== ВИЗУАЛИЗАЦИЯ ==========
-def show_tables_and_charts():
-    if not detected_packets:
-        print("Нет данных")
-        return
+    # Решение о блокировке
+    if ftype == 'DEAUTH' and is_attack and burst[printer_name] >= DEAUTH_THRESHOLD:
+        status = 'BLOCKED'
+    elif ftype == 'DEAUTH' and is_attack:
+        status = 'WARN'
+    else:
+        status = 'OK'
 
-    df = pd.DataFrame(detected_packets)
+    frames.append({
+        '№':        i + 1,
+        'Принтер':  printer_name,
+        'Тип':      ftype,
+        'MAC':      src,
+        'Статус':   status,
+    })
 
-    print("\n" + "="*60)
-    print("ТАБЛИЦА 1: Обнаруженные ARP-пакеты")
-    print("="*60)
-    print(df[['timestamp', 'src_ip', 'src_mac', 'operation', 'is_attack']].to_string())
+# Табличный вывод
+df = pd.DataFrame(frames)
 
-    print("\n" + "="*60)
-    print("ТАБЛИЦА 2: Статистика по принтерам")
-    print("="*60)
-    printer_stats = df.groupby('src_ip').size().reset_index(name='packet_count')
-    print(printer_stats)
+print()
+print('ТАБЛИЦА 1: Все кадры')
+print(df.to_string(index=False))
 
-    if attack_log:
-        df_attacks = pd.DataFrame(attack_log)
-        print("\n" + "="*60)
-        print("ТАБЛИЦА 3: Зафиксированные атаки")
-        print("="*60)
-        attack_summary = df_attacks.groupby(['src_ip', 'src_mac']).size().reset_index(name='count')
-        print(attack_summary)
+print()
+print('ТАБЛИЦА 2: Статистика по принтерам')
+printer_stats = df.groupby('Принтер')['Статус'].value_counts().unstack(fill_value=0)
+print(printer_stats.to_string())
 
-    # ГРАФИК 1: Количество пакетов по принтерам
-    plt.figure(figsize=(10, 6))
-    counts = df['src_ip'].value_counts()
-    plt.bar(counts.index, counts.values, color='skyblue', edgecolor='black')
-    plt.xlabel('IP принтера')
-    plt.ylabel('Количество пакетов')
-    plt.title('Статистика ARP-пакетов по принтерам')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('printer_stats.png')
+print()
+print('ТАБЛИЦА 3: Итого по статусам')
+print(df['Статус'].value_counts().to_string())
 
-    # ГРАФИК 2: Атаки vs легитимные пакеты
-    plt.figure(figsize=(8, 6))
-    attack_count = len(attack_log)
-    legit_count = len(detected_packets) - attack_count
-    plt.pie([legit_count, attack_count], 
-            labels=['Легитимные', 'Атаки'],
-            autopct='%1.1f%%',
-            colors=['green', 'red'],
-            explode=(0, 0.1))
-    plt.title('Соотношение легитимных пакетов и атак')
-    plt.savefig('attacks_pie.png')
+# Визуализация
 
-    # ГРАФИК 3: Количество атак по принтерам
-    plt.figure(figsize=(10, 6))
-    if attack_log:
-        attack_counts = Counter([a['src_ip'] for a in attack_log])
-        plt.bar(attack_counts.keys(), attack_counts.values(), color='red', edgecolor='black')
-        plt.xlabel('IP принтера')
-        plt.ylabel('Количество атак')
-        plt.title('Атаки по принтерам')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.savefig('attacks_by_printer.png')
+# График 1: Статусы по каждому принтеру
+plt.figure(figsize=(9, 5))
+printer_stats.plot(kind='bar', color=['green', 'red', 'orange'], edgecolor='black')
+plt.title('Статусы кадров по принтерам')
+plt.xlabel('Принтер')
+plt.ylabel('Количество кадров')
+plt.xticks(rotation=0)
+plt.legend(title='Статус')
+plt.tight_layout()
+plt.savefig('printer_stats.png')
 
+# График 2: Общее соотношение статусов
+plt.figure(figsize=(6, 6))
+status_counts = df['Статус'].value_counts()
+colors = ['green' if s == 'OK' else 'red' if s == 'BLOCKED' else 'orange'
+          for s in status_counts.index]
+plt.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%',
+        colors=colors, explode=[0.05] * len(status_counts))
+plt.title('Соотношение статусов обработки')
+plt.savefig('status_pie.png')
 
-
-print('='*60)
-print('КОНТЕЙНЕР МОНИТОРИНГА ARP-ТРАФИКА (ЭМУЛЯЦИЯ)')
-print('Для лабораторной работы по УЖЦИС')
-print('='*60)
-print('\nЭмулируем получение ARP-пакетов от принтеров...\n')
-
-emulate_arp_packets(num_packets=50)
-
-show_tables_and_charts()
-
+# График 3: Кол-во атак по принтерам
+plt.figure(figsize=(8, 5))
+attack_df = df[df['Статус'].isin(['WARN', 'BLOCKED'])]
+attack_counts = attack_df.groupby('Принтер').size()
+attack_counts.plot(kind='bar', color='red', edgecolor='black')
+plt.title('Количество атак по принтерам')
+plt.xlabel('Принтер')
+plt.ylabel('Кол-во deauth кадров')
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.savefig('attacks_by_printer.png')

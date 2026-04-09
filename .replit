@@ -70,3 +70,10 @@ args = "python sniffer.py"
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[userenv]
+
+[userenv.shared]
+AP_MAC = "AA:BB:CC:DD:EE:FF"
+SSID = "OfficeNet_5G"
+Deauth_threshold = "2"

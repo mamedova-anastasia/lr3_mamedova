@@ -1,12 +1,13 @@
 # Контейнер сниффера (802.11)
+import os
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Настройки сети
-AP_MAC = 'AA:BB:CC:DD:EE:FF'
-SSID = 'OfficeNet_5G'
-Deauth_threshold = 2  # сколько deauth подряд считается атакой
+# Настройки сети (читаем из переменных окружения - ключей контейнера)
+AP_MAC = os.environ.get('AP_MAC', 'AA:BB:CC:DD:EE:FF')
+SSID = os.environ.get('SSID', 'OfficeNet_5G')
+Deauth_threshold = int(os.environ.get('Deauth_threshold', '2'))  # сколько deauth подряд считается атакой
 
 Printers = {
     'Printer-1': '11:22:33:44:55:66',
@@ -15,7 +16,6 @@ Printers = {
 }
 
 Normal_types = ['BEACON', 'DATA', 'DATA', 'ASSOC_REQ', 'PROBE_REQ']
-
 frames = []
 
 # у каждого принтера свой brust-счетчик

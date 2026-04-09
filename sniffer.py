@@ -7,27 +7,28 @@ import matplotlib.pyplot as plt
 # Настройки сети (читаем из переменных окружения - ключей контейнера)
 AP_MAC = os.environ.get('AP_MAC', 'AA:BB:CC:DD:EE:FF')
 SSID = os.environ.get('SSID', 'OfficeNet_5G')
-Deauth_threshold = int(os.environ.get('Deauth_threshold', '2'))  # сколько deauth подряд считается атакой
+Deauth_threshold = int(os.environ.get('Deauth_threshold', '3'))  # сколько deauth подряд считается атакой
 
 Printers = {
     'Printer-1': '11:22:33:44:55:66',
     'Printer-2': '22:33:44:55:66:77',
-    'Printer-3': '33:44:55:66:77:88'
+    'Printer-3': '33:44:55:66:77:88',
+    'Printer-4': '44:55:66:77:88:99'
 }
 
 Normal_types = ['BEACON', 'DATA', 'DATA', 'ASSOC_REQ', 'PROBE_REQ']
 frames = []
 
 # у каждого принтера свой brust-счетчик
-burst = {'Printer-1': 0, 'Printer-2': 0, 'Printer-3': 0}
+burst = {'Printer-1': 0, 'Printer-2': 0, 'Printer-3': 0, 'Printer-4': 0}
 
-for i in range(15):
+for i in range(20):
   # Каждый кадр - выбираем случайный принтер как цель
   printer_name = random.choice(list(Printers.keys()))
   printer_mac = Printers[printer_name]
 
   # Зона атаки - кадры 6-12, вероятность 70%
-  is_attack = 6 <= i < 13 and random.random() < 0.7
+  is_attack = 5 <= i < 17 and random.random() < 0.7
 
   if is_attack:
     ftype =  'DEAUTH'

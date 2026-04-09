@@ -76,4 +76,4 @@ outputType = "console"
 [userenv.shared]
 AP_MAC = "AA:BB:CC:DD:EE:FF"
 SSID = "OfficeNet_5G"
-Deauth_threshold = "2"
+Deauth_threshold = "3"
